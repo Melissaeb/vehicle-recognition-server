@@ -1,44 +1,88 @@
-const { ImageAnalysisClient } = require("@azure-rest/ai-vision-image-analysis");
-const createClient = require("@azure-rest/ai-vision-image-analysis").default;
-const { AzureKeyCredential } = require("@azure/core-auth");
-
-// Logging for troubleshooting
-// const { setLogLevel } = require("@azure/logger");
-
-// setLogLevel("info");
-
+const express = require("express");
+const axios = require("axios");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
 
+const app = express();
+const PORT = process.env.PORT;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
+
+const upload = multer({ dest: "uploads/" });
+
+// Azure Computer Vision credentials
+const subscriptionKey = process.env["VISION_KEY"];
 const endpoint = process.env["VISION_ENDPOINT"];
-const key = process.env["VISION_KEY"];
-const credential = new AzureKeyCredential(key);
-const client = createClient(endpoint, credential);
 
-// Get the visual feature for analysis
-const features = ["Tags"];
+// Route to analyse image URL
+app.post("/analyse-url", async (req, res) => {
+  const { imageUrl } = req.body;
 
-const imageUrl =
-  "https://www.aa.co.nz/assets/motoring/car-reviews/toyota/corolla/2013/_resampled/FillWyIxMjgwIiwiNzIwIl0/Toyota-Corolla-2013-1.jpg?m=1533775245";
-async function analyzeImageFromUrl() {
-  const result = await client.path("/imageanalysis:analyze").post({
-    body: {
-      url: imageUrl,
-    },
-    queryParameters: {
-      features: features,
-    },
-    contentType: "application/json",
-  });
-
-  const iaResult = result.body;
-
-  // console.log(`Model Version: ${iaResult.modelVersion}`);
-  // console.log(`Image Metadata: ${JSON.stringify(iaResult.metadata)}`);
-  if (iaResult.tagsResult) {
-    iaResult.tagsResult.values.forEach((tag) =>
-      console.log(`Tag: ${JSON.stringify(tag)}`)
-    );
+  if (!imageUrl) {
+    return res.status(400).send({ error: "Image URL is required" });
   }
-}
 
-analyzeImageFromUrl();
+  try {
+    const response = await axios.post(
+      `${endpoint}/vision/v3.1/analyze`,
+      {
+        url: imageUrl,
+      },
+      {
+        headers: {
+          "Ocp-Apim-Subscription-Key": subscriptionKey,
+          "Content-Type": "application/json",
+        },
+        params: {
+          visualFeatures: "Tags",
+        },
+      }
+    );
+
+    res.send(response.data);
+  } catch (error) {
+    res.status(500).send({ error: "Error analyzing image" });
+  }
+});
+
+// Route to analyse uploaded image
+app.post("/analyse-upload", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ error: "Image file is required" });
+  }
+
+  try {
+    const imagePath = path.join(__dirname, req.file.path);
+    const imageBuffer = fs.readFileSync(imagePath);
+
+    const response = await axios.post(
+      `${endpoint}/vision/v3.1/analyze`,
+      imageBuffer,
+      {
+        headers: {
+          "Ocp-Apim-Subscription-Key": subscriptionKey,
+          "Content-Type": "application/octet-stream",
+        },
+        params: {
+          visualFeatures: "Tags",
+        },
+      }
+    );
+
+    fs.unlinkSync(imagePath); // Delete the file after upload
+
+    res.send(response.data);
+  } catch (error) {
+    res.status(500).send({ error: "Error analyzing image" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
