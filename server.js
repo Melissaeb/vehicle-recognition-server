@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
 // app.use(cors());
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "/tmp/" });
 
 // Azure Computer Vision credentials
 const subscriptionKey = process.env["VISION_KEY"];
