@@ -12,8 +12,8 @@ const PORT = process.env.PORT;
 
 // Middleware
 app.use(bodyParser.json());
-// app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
-app.use(cors());
+app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
+// app.use(cors());
 
 const upload = multer({ dest: "uploads/" });
 
