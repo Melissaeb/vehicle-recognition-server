@@ -59,7 +59,7 @@ app.post("/analyse-url", async (req, res) => {
 
 // Route to analyse uploaded image
 app.post("/analyse-upload", upload.single("image"), async (req, res) => {
-  console.log(req.file);
+  console.log("Received file:", req.file);
   if (!req.file) {
     return res.status(400).send({ error: "Image file is required" });
   }
@@ -86,6 +86,7 @@ app.post("/analyse-upload", upload.single("image"), async (req, res) => {
 
     res.send(response.data);
   } catch (error) {
+    console.error("Error analysing image:", error);
     res.status(500).send({ error: "Error analyzing image" });
   }
 });
