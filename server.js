@@ -12,7 +12,8 @@ const PORT = process.env.PORT;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
+// app.use(cors({ origin: [process.env.CLIENT_HOST, "http://localhost:5173"] }));
+app.use(cors());
 
 const upload = multer({ dest: "uploads/" });
 
@@ -23,6 +24,7 @@ const endpoint = process.env["VISION_ENDPOINT"];
 // Route to analyse image URL
 app.post("/analyse-url", async (req, res) => {
   const { imageUrl } = req.body;
+  console.log(req.body);
 
   if (!imageUrl) {
     return res.status(400).send({ error: "Image URL is required" });
