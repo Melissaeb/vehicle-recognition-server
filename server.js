@@ -15,6 +15,10 @@ app.use(bodyParser.json());
 app.use(cors({ origin: process.env.CLIENT_HOST }));
 // app.use(cors());
 
+// Configure multer for file uploads
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+// const upload = multer({ dest: "/tmp/" });
 const upload = multer({ dest: "uploads/" });
 
 // Azure Computer Vision credentials
