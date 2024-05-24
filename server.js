@@ -19,7 +19,7 @@ app.use(cors({ origin: process.env.CLIENT_HOST }));
 // const storage = multer.memoryStorage();
 // const upload = multer({ storage });
 // const upload = multer({ dest: "/tmp/" });
-const upload = multer({ dest: "uploads" });
+const upload = multer({ dest: "./new/" });
 
 // Azure Computer Vision credentials
 const subscriptionKey = process.env["VISION_KEY"];
