@@ -21,10 +21,10 @@ app.use(cors({ origin: process.env.CLIENT_HOST }));
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // specify the path to save files
+    cb(null, "/tmp");
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // specify the filename
+    cb(null, file.fieldname + "-" + Date.now());
   },
 });
 
