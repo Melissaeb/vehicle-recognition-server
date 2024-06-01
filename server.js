@@ -1,20 +1,18 @@
 const express = require("express");
 const axios = require("axios");
 const sharp = require("sharp");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
 const util = require("util");
 const unlinkFile = util.promisify(fs.unlink);
-const path = require("path");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.use(cors({ origin: process.env.CLIENT_HOST }));
 
@@ -73,6 +71,7 @@ app.post("/analyse-url", async (req, res) => {
   }
 });
 
+// Route to analyse uploads
 app.post("/analyse-upload", upload.single("image"), async (req, res) => {
   try {
     const fileBuffer = await fs.promises.readFile(req.file.path);
