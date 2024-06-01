@@ -30,16 +30,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Azure Computer Vision credentials
-const subscriptionKey = process.env["VISION_KEY"];
-const endpoint = process.env["VISION_ENDPOINT"];
-
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
 
 // Route to analyse image URL
-
 app.post("/analyse-url", async (req, res) => {
   const { imageUrl } = req.body;
 
